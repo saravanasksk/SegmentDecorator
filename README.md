@@ -1,3 +1,3 @@
 # SegmentDecorator
 WPF Diagram Control - https://www.syncfusion.com/wpf-ui-controls/diagram
-Segment Decorator in Syncfusion 
+Segment Decorator is Used for Connector Decoration 
