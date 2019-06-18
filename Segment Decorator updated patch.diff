@@ -1,0 +1,798 @@
+diff --git a/UWP/SfDiagram.UWP/Src/AutoGenerator/DiagramConstants.cs b/UWP/SfDiagram.UWP/Src/AutoGenerator/DiagramConstants.cs
+index cc98cf1..995fe8a 100644
+--- a/UWP/SfDiagram.UWP/Src/AutoGenerator/DiagramConstants.cs
++++ b/UWP/SfDiagram.UWP/Src/AutoGenerator/DiagramConstants.cs
+@@ -300,22 +300,26 @@ using System.Windows.Input;
+      internal static class SegmentDecoratorConstants
+      {
+            public const string Length = "Length";
+-
++        
+            public const string Displacement = "Displacement";
+ 
+            public const string Shape = "Shape";
+ 
+            public const string RelativeMode = "RelativeMode";
+ 
+-           public const string ID = "ID";
++           public const string Mode = "Mode";
++
++           public const string ID = "ID"; 
+ 
+            public const string Key = "Key";
+ 
++           public const string Recursive = "Recursive";
++
+            public static List<Tuple<DependencyProperty, string>> SegmentDecoratorProperties = new List<Tuple<DependencyProperty, string>>()
+            {
+ };
+-}
+-    
++      
++    }  
+       /// <summary>
+       /// Defines the constants for AnnotationEditor class.
+       /// </summary>
+diff --git a/UWP/SfDiagram.UWP/Src/AutoGenerator/ViewModel.cs b/UWP/SfDiagram.UWP/Src/AutoGenerator/ViewModel.cs
+index 0e4bfa7..b02934c 100644
+--- a/UWP/SfDiagram.UWP/Src/AutoGenerator/ViewModel.cs
++++ b/UWP/SfDiagram.UWP/Src/AutoGenerator/ViewModel.cs
+@@ -1218,15 +1218,19 @@ using Syncfusion.UI.Xaml.Diagram.Layout;
+              double _mDisplacement = 0d;
+      		
+              object _mShape = "M0,0 L10,5 L0,10";
+-     		
+-             SegmentDecoratorRelativeMode _mRelativeMode = SegmentDecoratorRelativeMode.Connector;
+-        
+-          #endregion
+-			
+-           /// <summary>
+-           /// Gets or sets the position of the SegmentDecorator over the Connector.
+-           /// </summary>
+-           public double Length
++
++        SegmentDecoratorRelativeMode _mRelativeMode = SegmentDecoratorRelativeMode.Connector;
++
++        SegmentDecoratorMode _mMode = SegmentDecoratorMode.Relative;
++
++        SegmentDecoratorAbsoluteMode _mRecursive = SegmentDecoratorAbsoluteMode.False;
++
++        #endregion
++
++        /// <summary>
++        /// Gets or sets the position of the SegmentDecorator over the Connector.
++        /// </summary>
++        public double Length
+            {
+               get
+                  {
+@@ -1237,15 +1241,19 @@ using Syncfusion.UI.Xaml.Diagram.Layout;
+                     if (_mLength != value)
+                { 
+                        _mLength = value;
+-                       OnPropertyChanged(SegmentDecoratorConstants.Length);
+-                    }
+-                 }
+-           }
+-			
+-           /// <summary>
+-           /// Gets or sets the absolute position of the segment decorator.
+-           /// </summary>
+-           public double Displacement
++                   
++                    OnPropertyChanged(SegmentDecoratorConstants.Length);
++                    //OnPropertyChanged(SegmentDecoratorWrapper);
++                    //OnSegmentDecoratorChanged(SegmentDecoratorConstants.Length);
++                }
++            }
++           }
++       
++
++        /// <summary>
++        /// Gets or sets the absolute position of the segment decorator.
++        /// </summary>
++        public double Displacement
+            {
+               get
+                  {
+@@ -1279,27 +1287,62 @@ using Syncfusion.UI.Xaml.Diagram.Layout;
+                     }
+                  }
+            }
+-			
+-           /// <summary>
+-           /// Gets or sets whether the decorator should be relative to connector or each segment.
+-           /// </summary>
+-           public SegmentDecoratorRelativeMode RelativeMode
+-           {
+-              get
+-                 {
+-                    return _mRelativeMode;
+-                 }
+-              set
+-                 {
+-                    if (_mRelativeMode != value)
+-               { 
+-                       _mRelativeMode = value;
+-                       OnPropertyChanged(SegmentDecoratorConstants.RelativeMode);
+-                    }
+-                 }
+-           }
+-   
++
++        /// <summary>
++        /// Gets or sets whether the decorator should be relative to connector or each segment.
++        /// </summary>
++        public SegmentDecoratorRelativeMode RelativeMode
++        {
++            get
++            {
++                return _mRelativeMode;
++            }
++            set
++            {
++                if (_mRelativeMode != value)
++                {
++                    _mRelativeMode = value;
++                    OnPropertyChanged(SegmentDecoratorConstants.RelativeMode);
++                    //OnSegmentDecoratorChanged(SegmentDecoratorConstants.RelativeMode);
++                }
++            }
++        }
++
++        public SegmentDecoratorAbsoluteMode Recursive
++        {
++            get
++            {
++                return _mRecursive;
++            }
++            set
++            {
++                if (_mRecursive != value)
++                {
++                    _mRecursive = value;
++                    OnPropertyChanged(SegmentDecoratorConstants.Recursive);
++                    //OnSegmentDecoratorChanged(SegmentDecoratorConstants.Recursive);
++                }
++            }
++        }
++
++        public SegmentDecoratorMode Mode
++        {
++            get
++            {
++                return _mMode;
++            }
++            set
++            {
++                if (_mMode != value)
++                {
++                    _mMode = value;
++                    OnPropertyChanged(SegmentDecoratorConstants.Mode);
++                    //OnSegmentDecoratorChanged(SegmentDecoratorConstants.Mode);
++                }
++            }
++        }
+     }
++    //SegmentDecorator class end
+ 
+      /// <summary> 			 
+      /// Annotation is a block of text that can be displayed over a node or connector.	
+diff --git a/UWP/SfDiagram.UWP/Src/AutoGenerator/Wrapper.cs b/UWP/SfDiagram.UWP/Src/AutoGenerator/Wrapper.cs
+index b43d509..1c01947 100644
+--- a/UWP/SfDiagram.UWP/Src/AutoGenerator/Wrapper.cs
++++ b/UWP/SfDiagram.UWP/Src/AutoGenerator/Wrapper.cs
+@@ -2076,13 +2076,17 @@ using Syncfusion.UI.Xaml.Diagram.Utility;
+           object _mShape = "M0,0 L10,5 L0,10";
+    
+           SegmentDecoratorRelativeMode _mRelativeMode = SegmentDecoratorRelativeMode.Connector;
+-      
+-    #endregion
+ 
+-      /// <summary>
+-      /// Gets or sets the position of the SegmentDecorator over the Connector.
+-      /// </summary>
+-      public double Length
++          SegmentDecoratorMode _mMode = SegmentDecoratorMode.Relative;
++
++          SegmentDecoratorAbsoluteMode _mRecursive = SegmentDecoratorAbsoluteMode.False;
++
++        #endregion
++
++        /// <summary>
++        /// Gets or sets the position of the SegmentDecorator over the Connector.
++        /// </summary>
++        public double Length
+       {
+           get
+              {
+@@ -2113,7 +2117,8 @@ using Syncfusion.UI.Xaml.Diagram.Utility;
+                    {
+                       _mLength = value;
+                        OnPropertyChanged(SegmentDecoratorConstants.Length);
+-                   }  
++                    //OnSegmentDecoratorChanged(SegmentDecoratorConstants.Length);
++                }  
+                }
+        }
+ 
+@@ -2193,10 +2198,10 @@ using Syncfusion.UI.Xaml.Diagram.Utility;
+                }
+        }
+ 
+-      /// <summary>
+-      /// Gets or sets whether the decorator should be relative to connector or each segment.
+-      /// </summary>
+-      public SegmentDecoratorRelativeMode RelativeMode
++        /// <summary>
++        /// Gets or sets whether the decorator should be relative to connector or each segment.
++        /// </summary>
++        public SegmentDecoratorRelativeMode RelativeMode
+       {
+           get
+              {
+@@ -2230,7 +2235,77 @@ using Syncfusion.UI.Xaml.Diagram.Utility;
+                    }  
+                }
+        }
+-}
++
++        public SegmentDecoratorAbsoluteMode Recursive
++        {
++            get
++            {
++                SegmentDecoratorAbsoluteMode returnValue;
++                if (_mSource is ISegmentDecorator)
++                {
++                    returnValue = (_mSource as ISegmentDecorator).Recursive;
++                }
++                else if (TryGetValue(SegmentDecoratorConstants.Recursive, out returnValue))
++                {
++                }
++                else
++                {
++                    returnValue = _mRecursive;
++                }
++                return returnValue;
++            }
++            set
++            {
++                if (_mSource is ISegmentDecorator)
++                {
++                    (_mSource as ISegmentDecorator).Recursive = value;
++                }
++                else if (SetValue(SegmentDecoratorConstants.Recursive, value))
++                {
++                }
++                else if (_mRecursive != value)
++                {
++                    _mRecursive = value;
++                    OnPropertyChanged(SegmentDecoratorConstants.Recursive);
++                }
++            }
++        }
++
++        public SegmentDecoratorMode Mode
++        {
++            get
++            {
++                SegmentDecoratorMode returnValue;
++                if (_mSource is ISegmentDecorator)
++                {
++                    returnValue = (_mSource as ISegmentDecorator).Mode;
++                }
++                else if (TryGetValue(SegmentDecoratorConstants.Mode, out returnValue))
++                {
++                }
++                else
++                {
++                    returnValue = _mMode;
++                }
++                return returnValue;
++            }
++            set
++            {
++                if (_mSource is ISegmentDecorator)
++                {
++                    (_mSource as ISegmentDecorator).Mode = value;
++                }
++                else if (SetValue(SegmentDecoratorConstants.Mode, value))
++                {
++                }
++                else if (_mMode != value)
++                {
++                    _mMode = value;
++                    OnPropertyChanged(SegmentDecoratorConstants.Mode);
++                }
++            }
++        }
++    }
+     internal partial class AnnotationEditorWrapper
+     {
+ 
+diff --git a/UWP/SfDiagram.UWP/Src/Connector/Segments/IConnectorSegment.cs b/UWP/SfDiagram.UWP/Src/Connector/Segments/IConnectorSegment.cs
+index 0067d0e..e71a430 100644
+--- a/UWP/SfDiagram.UWP/Src/Connector/Segments/IConnectorSegment.cs
++++ b/UWP/SfDiagram.UWP/Src/Connector/Segments/IConnectorSegment.cs
+@@ -225,7 +225,18 @@ namespace Syncfusion.UI.Xaml.Diagram
+         Connector,
+         Segment
+     }
+-
++    
++    public enum SegmentDecoratorAbsoluteMode
++    {
++        True,
++        False
++    }
++    public enum SegmentDecoratorMode
++    {
++       Absolute,
++       Relative,
++       
++    }
+     /// <summary>
+     /// IConnectorSegment
+     /// </summary>
+diff --git a/UWP/SfDiagram.UWP/Src/Enum/Enums.cs b/UWP/SfDiagram.UWP/Src/Enum/Enums.cs
+index 278ccd9..f518707 100644
+--- a/UWP/SfDiagram.UWP/Src/Enum/Enums.cs
++++ b/UWP/SfDiagram.UWP/Src/Enum/Enums.cs
+@@ -1229,7 +1229,7 @@ namespace Syncfusion.UI.Xaml.Diagram
+     public enum Mode
+     {
+         Node,
+-        Connector,
++        Connector     
+     }
+ 
+         public enum Cause
+diff --git a/UWP/SfDiagram.UWP/Src/Interface/ISegmentDecorator.cs b/UWP/SfDiagram.UWP/Src/Interface/ISegmentDecorator.cs
+index 66fdb53..589c259 100644
+--- a/UWP/SfDiagram.UWP/Src/Interface/ISegmentDecorator.cs
++++ b/UWP/SfDiagram.UWP/Src/Interface/ISegmentDecorator.cs
+@@ -19,7 +19,9 @@ namespace Syncfusion.UI.Xaml.Diagram
+         double Displacement { get; set; }
+         object Shape { get; set; }
+         SegmentDecoratorRelativeMode RelativeMode { get; set; }
++        SegmentDecoratorMode Mode { get; set; }
++        SegmentDecoratorAbsoluteMode Recursive { get; set; }
+ 
+-       // Style DecoratorStyle { get; set; }
++        // Style DecoratorStyle { get; set; }
+     }
+ }
+diff --git a/UWP/SfDiagram.UWP/Src/ViewModel/SegmentDecorator.cs b/UWP/SfDiagram.UWP/Src/ViewModel/SegmentDecorator.cs
+index 29a769b..70c9651 100644
+--- a/UWP/SfDiagram.UWP/Src/ViewModel/SegmentDecorator.cs
++++ b/UWP/SfDiagram.UWP/Src/ViewModel/SegmentDecorator.cs
+@@ -9,7 +9,7 @@ using System.Windows;
+ namespace Syncfusion.UI.Xaml.Diagram
+ {
+     public partial class SegmentDecorator : INotifyPropertyChanged, ISegmentDecorator
+-    {   
++    {       
+         internal bool _mUpdateBinding = false;
+ 
+         private IInternalConnector _mKnownConnector;
+@@ -33,12 +33,13 @@ namespace Syncfusion.UI.Xaml.Diagram
+             {
+                 PropertyChanged.Invoke(this, new PropertyChangedEventArgs(name));
+             }
++            OnSegmentDecoratorChanged(name);
+         }
+ 
+-        private void OnSegmentDecoratorChanged()
++        private void OnSegmentDecoratorChanged(string name)
+         {
+             if (KnownConnector != null && KnownConnector.View != null)
+                 (KnownConnector.View as Connector).UpdateSegmentDecorators();
+-        }
++        }       
+     }
+ }
+diff --git a/UWP/SfDiagram.UWP/Src/Wrapper/ConnectorWrapper.cs b/UWP/SfDiagram.UWP/Src/Wrapper/ConnectorWrapper.cs
+index 8650baa..8c98072 100644
+--- a/UWP/SfDiagram.UWP/Src/Wrapper/ConnectorWrapper.cs
++++ b/UWP/SfDiagram.UWP/Src/Wrapper/ConnectorWrapper.cs
+@@ -3069,6 +3069,7 @@ namespace Syncfusion.UI.Xaml.Diagram
+ 
+                 UpdateAnnotations();
+                 UpdateSegmentDecorators((View as Connector).SegmentDecoratorPanel);
++                OnSegmentDecoratorsChanged();
+                 UpdateCornerRadius();
+                 if (Utility.ConnectorRouting.IsNodeManipulationCompleted(SharedData))
+                 {
+diff --git a/UWP/SfDiagram.UWP/Src/Wrapper/ConnectorWrapper_Decorator.cs b/UWP/SfDiagram.UWP/Src/Wrapper/ConnectorWrapper_Decorator.cs
+index e6f8f76..a2ab9e3 100644
+--- a/UWP/SfDiagram.UWP/Src/Wrapper/ConnectorWrapper_Decorator.cs
++++ b/UWP/SfDiagram.UWP/Src/Wrapper/ConnectorWrapper_Decorator.cs
+@@ -15,7 +15,7 @@ using System.Windows.Controls;
+ using System.Windows.Media;
+ using CompositeTransform = System.Windows.Media.TransformGroup;
+ using System.Windows.Shapes;
+-using System.Windows.Media.Imaging; 
++using System.Windows.Media.Imaging;
+ using System.Windows.Data;
+ #endif
+ using Syncfusion.UI.Xaml.Diagram.Controller;
+@@ -30,13 +30,29 @@ using PolyLineSegment = Syncfusion.UI.Xaml.Diagram.PolyLineSegmentWrapper;
+ using BezierSegment = Syncfusion.UI.Xaml.Diagram.BezierSegmentWrapper;
+ using QuadraticBezierSegment = Syncfusion.UI.Xaml.Diagram.QuadraticBezierSegmentSegmentWrapper;
+ using System.Windows;
+-
++using System.ComponentModel;
+ 
+ namespace Syncfusion.UI.Xaml.Diagram
+ {
+ 
+     internal  partial class SegmentDecoratorWrapper : WrapperBase, ISegmentDecorator
+     {
++        internal bool _mUpdateBinding = false;
++
++        private IInternalConnector _mKnownConnector;
++
++        internal IInternalConnector KnownConnector
++        {
++            get { return _mKnownConnector; }
++            set
++            {
++                if (_mKnownConnector != value)
++                {
++                    _mKnownConnector = value;
++                }
++            }
++        }
++
+         public SegmentDecoratorWrapper(ISegmentDecorator source, SharedData shared)
+             : base(shared)
+         {
+@@ -50,70 +66,124 @@ namespace Syncfusion.UI.Xaml.Diagram
+         {
+         }
+ 
+-        protected override void OnPropertyChanged(string propertyName)
++        public event PropertyChangedEventHandler PropertyChanged;
++        protected override void OnPropertyChanged(string Name)
+         {
++            if (PropertyChanged != null)
++            {
++                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(Name));
++            }
+         }
+ 
+-    
++        private void OnSegmentDecoratorChanged(string name)
++        {
++            if (KnownConnector != null && KnownConnector.View != null)
++                (KnownConnector.View as Connector).UpdateSegmentDecorators();
++        }
+     }
+-
++   
+     internal partial class ConnectorWrapper
+     {
++        
+         void PrepareInternalDecorators(ISegmentDecorator source, Canvas panel)
+         {
+             if (!InternalSegmentDecorators.ContainsKey(source))
+                 InternalSegmentDecorators.Add(source, new List<Path>());
+             List<Path> decorators = InternalSegmentDecorators[source];
+ 
+-            if (source.RelativeMode == SegmentDecoratorRelativeMode.Segment)
++            if (source.Mode == SegmentDecoratorMode.Absolute)
+             {
+-                List<Path> children = InternalSegmentDecorators[source];
+-                int count = children.Count;
+-                int j = 0;
+-                double angle = 0;
+-                PathSegmentWrapper prev = null, wrapper = null;
+-                if (InternalSegments.Count > 0)
++                var points = (this as ConnectorWrapper).GetPoints();
++                double length = Utility.ConnectorRouting.GetLengthFromListOfPoints(points);
++
++                if (source.Recursive == SegmentDecoratorAbsoluteMode.True)
+                 {
+-                    foreach (var seg in InternalSegments)
++                    if (source.Length != 0)
+                     {
+-                        if (seg is LineSegmentWrapper)
++                        int noofPossibleDecorators = Convert.ToInt32(Math.Floor(length / source.Length));
++
++                        if (InternalSegmentDecorators[source].Count < noofPossibleDecorators)
+                         {
+-                            wrapper = seg as LineSegmentWrapper;
+-                            if (prev != null && angle == wrapper.GetEndPoint().FindAngle(prev.GetEndPoint())) continue;
+-                            else
++                            int i = InternalSegmentDecorators[source].Count;
++                            while (i < noofPossibleDecorators)
+                             {
+-                                if (prev == null) angle = wrapper.GetEndPoint().FindAngle(this.SourcePoint);
+-                                else angle = wrapper.GetEndPoint().FindAngle(prev.GetEndPoint());
++                                this.CreateDecorator(source, panel);
++                                i++;
++                            }
++                        }
++                        else
++                        {
++                            while (noofPossibleDecorators < InternalSegmentDecorators[source].Count)
++                            {
++                                this.RemoveDecorator(source, panel);
+                             }
+-                            j++;
+-                            if (j > children.Count) CreateDecorator(source, panel);
+-                            prev = seg as LineSegmentWrapper;
+                         }
+                     }
+                 }
+-                if (count > j)
++                else
+                 {
+-                    int dif = count - j;
+-                    for (int i = dif; i > 0; i--)
+-                        this.RemoveDecorator(source, panel);
+-                }
++                    if (InternalSegmentDecorators[source].Count != 0)
++                    {
++                        for (int i = InternalSegmentDecorators[source].Count - 1; i > 0; i--)
++                        {
++                            this.RemoveDecorator(source, panel);
++                        }
++                    }
++                    else this.CreateDecorator(source, panel);
++                }            
+             }
+             else
+             {
+-                if (InternalSegmentDecorators[source].Count != 0)
++                if (source.RelativeMode == SegmentDecoratorRelativeMode.Segment)
+                 {
+-                    for (int i = InternalSegmentDecorators[source].Count - 1; i > 0; i--)
++                    List<Path> children = InternalSegmentDecorators[source];
++                    int count = children.Count;
++                    int j = 0;
++                    double angle = 0;
++                    PathSegmentWrapper prev = null, wrapper = null;
++                    if (InternalSegments.Count > 0)
+                     {
+-                        this.RemoveDecorator(source, panel);
++                        foreach (var seg in InternalSegments)
++                        {
++                            if (seg is LineSegmentWrapper)
++                            {
++                                wrapper = seg as LineSegmentWrapper;
++                                if (prev != null && angle == wrapper.GetEndPoint().FindAngle(prev.GetEndPoint())) continue;
++                                else
++                                {
++                                    if (prev == null) angle = wrapper.GetEndPoint().FindAngle(this.SourcePoint);
++                                    else angle = wrapper.GetEndPoint().FindAngle(prev.GetEndPoint());
++                                }
++                                j++;
++                                if (j > children.Count) CreateDecorator(source, panel);
++                                prev = seg as LineSegmentWrapper;
++                            }
++                        }
++                    }
++                    if (count > j)
++                    {
++                        int dif = count - j;
++                        for (int i = dif; i > 0; i--)
++                            this.RemoveDecorator(source, panel);
+                     }
+                 }
+-                else this.CreateDecorator(source, panel);
++                else
++                {
++                    if (InternalSegmentDecorators[source].Count != 0)
++                    {
++                        for (int i = InternalSegmentDecorators[source].Count - 1; i > 0; i--)
++                        {
++                            this.RemoveDecorator(source, panel);
++                        }
++                    }
++                    else this.CreateDecorator(source, panel);
++                }
+             }
+         }
+-
++      
+         bool UpdateSegmentDecoratorPosition(PathSegmentWrapper knownSegment, PathSegmentWrapper prev,
+-            ISegmentDecorator decorator, out double offsetX, out double offsetY, out double angle)
+-        {
++            ISegmentDecorator decorator, out double offsetX, out double offsetY, out double angle,int hhh)
++        { 
+             angle = 0;
+             offsetX = offsetY = 0;
+             IInternalConnector connector = this;
+@@ -121,27 +191,54 @@ namespace Syncfusion.UI.Xaml.Diagram
+             {
+                 double _mlength;
+                 List<Point> points = new List<Point>();
+-                if (decorator.RelativeMode == SegmentDecoratorRelativeMode.Connector)
++
++                    if (decorator.Mode == SegmentDecoratorMode.Absolute)
++                    {
++                        points = (connector as ConnectorWrapper).GetPoints();
++                    }
++
++                if(decorator.Mode != SegmentDecoratorMode.Absolute )
++                {
++                    if (decorator.RelativeMode == SegmentDecoratorRelativeMode.Connector)
++                    {
++                        points = (connector as ConnectorWrapper).GetPoints();
++                    }
++                    else
++                    {
++                        if (knownSegment != null)
++                        {
++                            if (prev != null) points = knownSegment.GetPoints(prev.GetEndPoint(), true);
++                            else points = knownSegment.GetPoints(SourcePoint, true);
++                        }
++                    }
++                }     
++                 double length = Utility.ConnectorRouting.GetLengthFromListOfPoints(points);
++                 if (length < 50) return false;
++                 length += decorator.Displacement;
++
++                if (decorator.Mode == SegmentDecoratorMode.Absolute)
+                 {
+-                    points = (connector as ConnectorWrapper).GetPoints();
++                         double absLength = decorator.Length;
++                         absLength *= hhh + 1;
++
++                        if (absLength < length - 25 && absLength > 25)
++                        {
++                            _mlength = absLength;
++                            Point point = (connector as ConnectorWrapper).GetPointAtLength(absLength, points, out angle);
++                            offsetX = point.X;
++                            offsetY = point.Y;
++                            return true;
++                        }
+                 }
+                 else
+                 {
+-                    if (knownSegment != null)
+-                    {
+-                        if (prev != null) points = knownSegment.GetPoints(prev.GetEndPoint(), true);
+-                        else points = knownSegment.GetPoints(SourcePoint, true);
+-                    }
++                    double absLength = length * decorator.Length;
++                    _mlength = absLength;
++                    Point point = (connector as ConnectorWrapper).GetPointAtLength(absLength, points, out angle);
++                    offsetX = point.X;
++                    offsetY = point.Y;
++                    return true;
+                 }
+-                double length = Utility.ConnectorRouting.GetLengthFromListOfPoints(points);
+-                if (length < 50) return false;
+-                length += decorator.Displacement;
+-                double absLength = length * decorator.Length;
+-                _mlength = absLength;
+-                Point point = (connector as ConnectorWrapper).GetPointAtLength(absLength, points, out angle);
+-                offsetX = point.X;
+-                offsetY = point.Y;
+-                return true;
+             }
+             return false;
+         }
+@@ -160,7 +257,7 @@ namespace Syncfusion.UI.Xaml.Diagram
+                 CompositeTransform transform = CompositeTransformExtension.New();
+                 view.RenderTransform = transform;
+                 view.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+-            }
++            }    
+         }
+ 
+         void RemoveDecorator(ISegmentDecorator decorator, Canvas panel)
+@@ -216,6 +313,7 @@ namespace Syncfusion.UI.Xaml.Diagram
+ 
+         internal void UpdateSegmentDecorators(Canvas SegmentDecoratorPanel)
+         {
++            
+             if (SegmentDecorators != null)
+             {
+                 foreach (var source in SegmentDecorators as IEnumerable<ISegmentDecorator>)
+@@ -225,54 +323,71 @@ namespace Syncfusion.UI.Xaml.Diagram
+ 
+                     if (SegmentDecoratorPanel.Children.Count != 0)
+                     {
+-                        //Update the decorator when the relative mode is connector
+-                        if (source.RelativeMode == SegmentDecoratorRelativeMode.Connector)
++                        if(source.Mode == SegmentDecoratorMode.Absolute)
+                         {
++                            if(source.Recursive == SegmentDecoratorAbsoluteMode.True)
++                            {
++                                for(int index =0; index < InternalSegmentDecorators[source].Count; index++)
++                                {
++                                    UpdateSegmentDecorator(null, null, source, index );
++                                }      
++                            }
++                            else
+                             UpdateSegmentDecorator(null, null, source);
+                         }
+                         else
+                         {
+-                            int j = 0;
+-                            double angle = 0;
+-                            LineSegmentWrapper prev = null, superPrev = null;
+-                            LineSegmentWrapper wrapper;
+-                            if (InternalSegments.Count > 0)
++                            //Update the decorator when the relative mode is connector   
++                            if (source.RelativeMode == SegmentDecoratorRelativeMode.Connector)
++                            {
++                                UpdateSegmentDecorator(null, null, source);
++                            }
++                            else
+                             {
+-                                //Update the segment decorator for all line/orthogonal segments
+-                                foreach (var seg in InternalSegments)
++                                int j = 0;
++                                double angle = 0;
++                                LineSegmentWrapper prev = null, superPrev = null;
++                                LineSegmentWrapper wrapper;
++                                if (InternalSegments.Count > 0)
+                                 {
+-                                    if (seg is LineSegmentWrapper)
++                                    //Update the segment decorator for all line/orthogonal segments
++                                    foreach (var seg in InternalSegments)
+                                     {
+-                                        wrapper = seg as LineSegmentWrapper;
+-                                        if (prev != null && angle == wrapper.GetEndPoint().FindAngle(prev.GetEndPoint()))
++                                        if (seg is LineSegmentWrapper)
+                                         {
+-                                            UpdateSegmentDecorator(wrapper, superPrev, source, j - 1);
++                                            wrapper = seg as LineSegmentWrapper;
++                                            if (prev != null && angle == wrapper.GetEndPoint().FindAngle(prev.GetEndPoint()))
++                                            {
++                                                UpdateSegmentDecorator(wrapper, superPrev, source, j - 1);
++                                            }
++                                            else
++                                            {
++                                                if (prev == null) angle = wrapper.GetEndPoint().FindAngle(this.SourcePoint);
++                                                else angle = wrapper.GetEndPoint().FindAngle(prev.GetEndPoint());
++                                                UpdateSegmentDecorator(wrapper, prev, source, j);
++                                                j++;
++                                                superPrev = prev;
++                                            }
++                                            prev = wrapper;
+                                         }
+-                                        else
+-                                        {
+-                                            if (prev == null) angle = wrapper.GetEndPoint().FindAngle(this.SourcePoint);
+-                                            else angle = wrapper.GetEndPoint().FindAngle(prev.GetEndPoint());
+-                                            UpdateSegmentDecorator(wrapper, prev, source, j);
+-                                            j++;
+-                                            superPrev = prev;
+-                                        }
+-                                        prev = wrapper;
+-                                    }
+ 
++                                    }
+                                 }
+                             }
+                         }
++                       
+                         (source as SegmentDecorator)._mUpdateBinding = false;
+                     }
+                 }
+             }
+         }
+ 
+-        void UpdateSegmentDecorator(PathSegmentWrapper path, PathSegmentWrapper prev, ISegmentDecorator source, int index = 0)
++        void UpdateSegmentDecorator(PathSegmentWrapper path, PathSegmentWrapper prev, ISegmentDecorator source, int index=0)
+         {
+             double offsetX, offsetY, angle;
++            int hhh = index;
+             List<Path> children = InternalSegmentDecorators[source];
+-            bool visibile = UpdateSegmentDecoratorPosition(path, prev, source, out offsetX, out offsetY, out angle);
++            bool visibile = UpdateSegmentDecoratorPosition(path, prev, source, out offsetX, out offsetY, out angle, index);
+             Path view = children[index] as Path;
+             if (source is SegmentDecorator && (source as SegmentDecorator)._mUpdateBinding)
+             {
+@@ -298,4 +413,4 @@ namespace Syncfusion.UI.Xaml.Diagram
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
